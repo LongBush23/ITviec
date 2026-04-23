@@ -8,24 +8,12 @@ import { Public } from './decorators/public.decorator';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  // POST /auth/login
-  // @Public() vì đây là route đăng nhập, không cần JWT
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req: ExpressRequest & { user: AuthUser }): {
     access_token: string;
   } {
-    // req.user được LocalStrategy gán sau khi validateUser thành công
-    return this.authService.login(req.user);
-  }
-
-
-  @get('long')
-  login(@Request() req: ExpressRequest & { user: AuthUser }): {
-    access_token: string;
-  } {
-    // req.user được LocalStrategy gán sau khi validateUser thành công
     return this.authService.login(req.user);
   }
 }

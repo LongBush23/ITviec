@@ -13,6 +13,48 @@ export class User {
 
   @Prop({ required: true })
   password: string;
+
+  @Prop()
+  age: number;
+
+  @Prop()
+  gender: string;
+
+  @Prop()
+  address: string;
+
+  @Prop({ type: Object })
+  company: {
+    _id: string;
+    name: string;
+  };
+
+  @Prop()
+  role: string;
+
+  @Prop()
+  refreshToken: string;
+
+  @Prop({ default: false })
+  isDeleted: boolean;
+
+  @Prop({ type: Object })
+  createdBy: {
+    _id: string;
+    email: string;
+  };
+
+  @Prop({ type: Object })
+  updatedBy: {
+    _id: string;
+    email: string;
+  };
+
+  @Prop({ type: Object })
+  deletedBy: {
+    _id: string;
+    email: string;
+  };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
