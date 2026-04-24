@@ -9,11 +9,14 @@ async function bootstrap() {
   // #22.5: Global Validation Pipe - validate & transform data
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,       // Loại bỏ các field không có trong DTO
+      whitelist: true, // Loại bỏ các field không có trong DTO
       forbidNonWhitelisted: true, // Báo lỗi nếu có field lạ
-      transform: true,       // Tự động transform (string => number, v.v.)
+      transform: true, // Tự động transform (string => number, v.v.)
     }),
   );
+
+  //config cors
+  app.enableCors();
 
   const configService = app.get(ConfigService);
   const port = configService.get<string>('PORT') ?? '8000';
