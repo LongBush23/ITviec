@@ -55,6 +55,13 @@ export class User {
     _id: string;
     email: string;
   };
+
+  // #47 timestamps — tự động set bởi mongoose (timestamps: true)
+  createdAt: Date;
+  updatedAt: Date;
+
+  // #48 soft-delete — tự động set bởi soft-delete-plugin-mongoose
+  deletedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

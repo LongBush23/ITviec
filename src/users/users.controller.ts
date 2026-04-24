@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,10 +24,18 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  // GET /users
+  // GET /users?current=1&pageSize=10&role=ADMIN
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query('current') current: string,
+    @Query('pageSize') pageSize: string,
+    @Query() queryString: string,
+  ) {
+    return this.usersService.findAll(
+      +current || 1,
+      +pageSize || 10,
+      queryString,
+    );
   }
 
   // GET /users/:id
