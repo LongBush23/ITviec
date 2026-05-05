@@ -60,7 +60,8 @@ export class User {
   createdAt: Date;
   updatedAt: Date;
 
-  // #48 soft-delete — tự động set bởi soft-delete-plugin-mongoose
+  // #48 soft-delete — tự động set bởi src/utils/soft-delete.plugin.ts
+  @Prop()
   deletedAt: Date;
 }
 

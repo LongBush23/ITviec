@@ -1,10 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
+import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import type { SoftDeleteModel } from '../utils/soft-delete.plugin';
+
+const SALT_ROUNDS = 10;
 
 @Injectable()
 export class UsersService {
@@ -13,7 +16,14 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const created = await this.userModel.create(createUserDto);
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      SALT_ROUNDS,
+    );
+    const created = await this.userModel.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
     return this.userModel.findById(created._id).select('-password').lean();
   }
 
@@ -65,5 +75,24 @@ export class UsersService {
 
   async remove(id: string) {
     return this.userModel.softDelete({ _id: id });
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string | null) {
+    const hashed = refreshToken
+      ? await bcrypt.hash(refreshToken, SALT_ROUNDS)
+      : null;
+    return this.userModel.findByIdAndUpdate(userId, { refreshToken: hashed });
+  }
+
+  async validateRefreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<boolean> {
+    const user = await this.userModel
+      .findById(userId)
+      .select('refreshToken')
+      .lean();
+    if (!user?.refreshToken) return false;
+    return bcrypt.compare(refreshToken, user.refreshToken);
   }
 }
