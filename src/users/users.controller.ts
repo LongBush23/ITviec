@@ -8,11 +8,14 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public } from '../auth/decorators/public.decorator';
 
+@ApiTags('users')
+@ApiBearerAuth('token')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
