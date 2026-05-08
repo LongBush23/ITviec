@@ -5,7 +5,7 @@ import { Company, CompanyDocument } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import type { SoftDeleteModel } from '../utils/soft-delete.plugin';
-import { AuthUser } from '../auth/auth.service';
+import type { IUser } from '../users/users.interface';
 
 @Injectable()
 export class CompaniesService {
@@ -14,7 +14,7 @@ export class CompaniesService {
     private companyModel: SoftDeleteModel<CompanyDocument>,
   ) {}
 
-  async create(createCompanyDto: CreateCompanyDto, user: AuthUser) {
+  create(createCompanyDto: CreateCompanyDto, user: IUser) {
     return this.companyModel.create({
       ...createCompanyDto,
       createdBy: { _id: user._id, email: user.email },
@@ -54,23 +54,18 @@ export class CompaniesService {
     return company;
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto, user: AuthUser) {
-    const company = await this.companyModel
-      .findByIdAndUpdate(
-        id,
-        {
-          ...updateCompanyDto,
-          updatedBy: { _id: user._id, email: user.email },
-        },
-        { new: true },
-      )
-      .lean();
-    if (!company)
-      throw new NotFoundException(`Company with id ${id} not found`);
-    return company;
+  update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
+    return this.companyModel.findByIdAndUpdate(
+      id,
+      {
+        ...updateCompanyDto,
+        updatedBy: { _id: user._id, email: user.email },
+      },
+      { new: true },
+    );
   }
 
-  async remove(id: string, user: AuthUser) {
+  async remove(id: string, user: IUser) {
     await this.companyModel.findByIdAndUpdate(id, {
       deletedBy: { _id: user._id, email: user.email },
     });

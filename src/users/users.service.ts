@@ -55,7 +55,10 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const user = await this.userModel.findById(id).select('-password').lean();
+    const user = await this.userModel
+      .findById(id)
+      .select('-password -refreshToken')
+      .lean();
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
     return user;
   }

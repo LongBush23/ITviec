@@ -4,61 +4,66 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
   Query,
-  Request,
 } from '@nestjs/common';
-import { Request as ExpressRequest } from 'express';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { AuthUser } from '../auth/auth.service';
+import { ResponseMessage, User } from '../decorator/customize';
+import type { IUser } from '../users/users.interface';
 
-interface RequestWithUser extends ExpressRequest {
-  user: AuthUser;
-}
-
+@ApiTags('companies')
+@ApiBearerAuth('token')
 @Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
+  // #54: POST /companies
   @Post()
-  create(
-    @Body() createCompanyDto: CreateCompanyDto,
-    @Request() req: RequestWithUser,
-  ) {
-    return this.companiesService.create(createCompanyDto, req.user);
+  @ResponseMessage('Create a new company')
+  create(@Body() createCompanyDto: CreateCompanyDto, @User() user: IUser) {
+    return this.companiesService.create(createCompanyDto, user);
   }
 
+  // #59: GET /companies?current=1&pageSize=10
   @Get()
+  @ResponseMessage('Fetch list companies with paginate')
   findAll(
     @Query('current') current: string,
     @Query('pageSize') pageSize: string,
-    @Query() query: Record<string, string>,
+    @Query() queryString: Record<string, string>,
   ) {
-    const currentPage = +current || 1;
-    const size = +pageSize || 10;
-    const queryString = new URLSearchParams(query).toString();
-    return this.companiesService.findAll(currentPage, size, queryString);
+    return this.companiesService.findAll(
+      +current || 1,
+      +pageSize || 10,
+      new URLSearchParams(queryString).toString(),
+    );
   }
 
   @Get(':id')
+  @ResponseMessage('Fetch a company by id')
   findOne(@Param('id') id: string) {
     return this.companiesService.findOne(id);
   }
 
-  @Put(':id')
+  // #57: PATCH /companies/:id
+  @Patch(':id')
+  @ResponseMessage('Update a company')
   update(
     @Param('id') id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
-    @Request() req: RequestWithUser,
+    @User() user: IUser,
   ) {
-    return this.companiesService.update(id, updateCompanyDto, req.user);
+    return this.companiesService.update(id, updateCompanyDto, user);
   }
 
+  // #58: DELETE /companies/:id (soft delete)
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req: RequestWithUser) {
-    return this.companiesService.remove(id, req.user);
+  @ResponseMessage('Delete a company')
+  remove(@Param('id') id: string, @User() user: IUser) {
+    return this.companiesService.remove(id, user);
   }
 }
